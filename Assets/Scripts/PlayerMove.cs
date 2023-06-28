@@ -1,11 +1,14 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//»ç¿ëÀÚÀÇ ÀÔ·Â¿¡ µû¶ó ¾ÕµÚ ÁÂ¿ì·Î ÀÌµ¿ÇÏ°í ½Í´Ù.
-//»ç¿ëÀÚ°¡ Á¡ÇÁ¹öÆ°À» ´©¸£¸é Á¡ÇÁ¸¦ ¶Ù°í½Í´Ù.
+//ì‚¬ìš©ìì˜ ì…ë ¥ì— ë”°ë¼ ì•ë’¤ ì¢Œìš°ë¡œ ì´ë™í•˜ê³  ì‹¶ë‹¤.
+//ì‚¬ìš©ìê°€ ì í”„ë²„íŠ¼ì„ ëˆ„ë¥´ë©´ ì í”„ë¥¼ ë›°ê³ ì‹¶ë‹¤.
+//ìµœëŒ€ ì í”„ íšŸìˆ˜ë¥¼ ì •í•´ì„œ ì—¬ëŸ¬ë²ˆ ë›°ê²Œ í•˜ê³ ì‹¶ë‹¤.
 public class PlayerMove : MonoBehaviour
 {
+    int jumpCount;
+    public int maxJumpCount = 2;
     public float jumpPower = 10;
     public float gravity = -9.81f;
     float yVelocity;
@@ -18,37 +21,51 @@ public class PlayerMove : MonoBehaviour
     private void Start()
     {
         cam = Camera.main;
-        // º»Ã¼¿¡°Ô cc¸¦ ¾ò¾î¿À°í ½Í´Ù.
+        // ë³¸ì²´ì—ê²Œ ccë¥¼ ì–»ì–´ì˜¤ê³  ì‹¶ë‹¤.
         cc = gameObject.GetComponent<CharacterController>();
     }
     private void Update()
     {
-        // Áß·ÂÀÇ ÈûÀÌ y¼Óµµ¿¡ ÀÛ¿ëÇØ¾ßÇÑ´Ù.
+        // ì¤‘ë ¥ì˜ í˜ì´ yì†ë„ì— ì‘ìš©í•´ì•¼í•œë‹¤.
         // 9.81 m/s
         yVelocity += gravity * Time.deltaTime;
 
-        // ¸¸¾à ¶¥¿¡ ÀÖ´Ù ±×¸®°í »ç¿ëÀÚ°¡ Á¡ÇÁ¹öÆ°À» ´©¸£¸é
-        if (cc.isGrounded && Input.GetButtonDown("Jump"))
+        /* 0ì´ ì•„ë‹ˆë©´ ë•…ì— ì°©ì§€í–ˆë‹¤
+         collision flagsëŠ” 2ì§„ë²•ìœ¼ë¡œ ìœ„, ì•„ë˜, ë°”ë‹¥ì„ í†µí•´ ì¶©ëŒì„ ê°ì§€í•œë‹¤.
+        none = 0000, side = 0001, above = 0010, below = 0100 
+        */
+
+        // ë•…í—¤ ë‹¿ì•˜ë‹¤ë©´ ì í”„ì¹´ìš´íŠ¸ë¥¼ ì´ˆê¸°í™” í•˜ê³ ì‹¶ë‹¤.
+        if (cc.isGrounded)
         {
-            // JumpPower°¡ ÀÛ¿ëÇØ¾ßÇÑ´Ù.
+            jumpCount = 0;
+            // ë•…ì— ì„œìˆì„ë•ŒëŠ” yì†ë„ê°€ ë³€í™”í•˜ì§€ ì•Šê²Œ í•˜ê³ ì‹¶ë‹¤.
+            yVelocity = 0;
+        }
+        // ë§Œì•½ ì í”„ì¹´ìš´íŠ¸ê°€ ìµœëŒ€ ë³´ë‹¤ ì‘ë‹¤ ê·¸ë¦¬ê³  ì‚¬ìš©ìê°€ ì í”„ë²„íŠ¼ì„ ëˆ„ë¥´ë©´
+        // ë§Œì•½ ë•…ì— ìˆë‹¤ ê·¸ë¦¬ê³  ì‚¬ìš©ìê°€ ì í”„ë²„íŠ¼ì„ ëˆ„ë¥´ë©´
+        if (jumpCount < maxJumpCount && Input.GetButtonDown("Jump"))
+        {
+            // JumpPowerê°€ ì‘ìš©í•´ì•¼í•œë‹¤.
             yVelocity = jumpPower;
+            jumpCount++;
         }
 
-        //1.»ç¿ëÀÚÀÇ ÀÔ·Â¿¡ µû¶ó
+        //1.ì‚¬ìš©ìì˜ ì…ë ¥ì— ë”°ë¼
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
-        //2.¾ÕµÚ ÁÂ¿ì·Î ÀÌµ¿ÇÏ°í ½Í´Ù.
+        //2.ì•ë’¤ ì¢Œìš°ë¡œ ì´ë™í•˜ê³  ì‹¶ë‹¤.
         Vector3 dir = new Vector3(h, 0, v);
 
-        //3. ÇöÀç ¹æÇâÀ» Ä«¸Ş¶óÀÇ ¾Õ¹æÇâÀ» ±âÁØÀ¸·Î º¯È¯ÇÏ°í½Í´Ù.
+        //3. í˜„ì¬ ë°©í–¥ì„ ì¹´ë©”ë¼ì˜ ì•ë°©í–¥ì„ ê¸°ì¤€ìœ¼ë¡œ ë³€í™˜í•˜ê³ ì‹¶ë‹¤.
         dir = cam.transform.TransformDirection(dir);
         dir.y = 0;
 
         transform.position += dir.normalized * speed * Time.deltaTime;
-        // °áÁ¤µÈ y¼Óµµ¸¦ dirÀÇ y Ç×¸ñ¿¡ ¹İ¿µµÇ¾î¾ßÇÑ´Ù.
+        // ê²°ì •ëœ yì†ë„ë¥¼ dirì˜ y í•­ëª©ì— ë°˜ì˜ë˜ì–´ì•¼í•œë‹¤.
         Vector3 velocity = dir * speed;
         velocity.y = yVelocity;
-        //4.±× ¹æÇâÀ¸·Î 1·Î ÀÌµ¿ÇÏ°í ½Í´Ù.
+        //4.ê·¸ ë°©í–¥ìœ¼ë¡œ 1ë¡œ ì´ë™í•˜ê³  ì‹¶ë‹¤.
         //transform.position += velocity * Time.deltaTime;
         cc.Move(velocity * Time.deltaTime);
     }
