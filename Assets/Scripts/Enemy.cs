@@ -67,6 +67,7 @@ public class Enemy : MonoBehaviour
         {
             // 공격상태로 전이하고싶다.
             state = State.Attack;
+            anim.SetTrigger("Attack");
         }
     }
 
@@ -78,9 +79,9 @@ public class Enemy : MonoBehaviour
     AttackSubState attackSubState;
     bool isAttackHit;
     float currentTime;
-    float attackHitTime = 0.5f;
-    float attackFinishedTime = 2;
-    float attackWaitTime = 1;
+    float attackHitTime = 0.91f;
+    float attackFinishedTime = 2.2f;
+    float attackWaitTime = 2;
 
     private void UpdateAttack()
     {
@@ -96,6 +97,7 @@ public class Enemy : MonoBehaviour
                 currentTime = 0;
                 // 공격상태로 전이하고 싶다.
                 isAttackHit = false;
+                anim.SetBool("ReAttack", true);
             }
 
         }
@@ -109,6 +111,7 @@ public class Enemy : MonoBehaviour
                 {
                     // 타격 !
                     isAttackHit = true;
+                    anim.SetBool("ReAttack", false);
                     print("에너미는 플레이러를 공격한다.");
                 }
                 // 공격끝시간이 초과하면
