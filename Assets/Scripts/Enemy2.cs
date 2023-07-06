@@ -8,12 +8,15 @@ using UnityEngine.AI;
 // agent를 이용해서 이동하고 싶다.
 public class Enemy2 : MonoBehaviour
 {
+    EnemyHP enemyHP;
     public Animator anim;
     public enum State
     {
         Idle,
         Move,
-        Attack
+        Attack,
+        React, //데미지
+        Die //죽음
     }
     public State state;
 
@@ -25,7 +28,9 @@ public class Enemy2 : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponentInChildren<Animator>();
+        enemyHP = GetComponent<EnemyHP>();
     }
+
     private void Update()
     {
         // state를 기준으로 분기러치 해보세요
@@ -80,6 +85,8 @@ public class Enemy2 : MonoBehaviour
         }
         //이동상태로 전이하고싶다.
     }
+
+    #region 애니메이션 이벤트 함수를 통해 호출되는 함수들
     public void OnAttack_Finished()
     {
         //대기상태로 가야하는가?
@@ -91,7 +98,7 @@ public class Enemy2 : MonoBehaviour
             anim.SetTrigger("Move");
             agent.isStopped = false;
         }
-       
+
     }
 
     public void OnAttack_Hit()
@@ -103,6 +110,7 @@ public class Enemy2 : MonoBehaviour
         if (distance < attackRange)
         {
             print("Enemy -> Player Hit!");
+            HitManager.instance.DoHit();
             state = State.Attack;
             anim.SetTrigger("Attack");
             agent.isStopped = true;
@@ -122,6 +130,36 @@ public class Enemy2 : MonoBehaviour
         else
         {
             anim.SetBool("ReAttack", true);
+        }
+    }
+
+    public void OnReact_Finished()
+    {
+        //리액션이 끝났으니 Move상태로 전이하고 싶다.
+        state = State.Move;
+        anim.SetTrigger("Move");
+    }
+    #endregion
+
+    internal void DamageProcess(int damage = 1)
+    {
+        if (state == State.Die) return;
+        //적 체력을 1감소하고싶다.
+        enemyHP.HP -= damage;
+        agent.isStopped = true;
+        //만약 적 체력이 0이하라면
+        if (enemyHP.HP <= 0)
+        {
+            state = State.Die;
+            // 파괴하고싶다.
+            Destroy(gameObject, 5);
+            anim.SetTrigger("Die");
+
+        }
+        else // 체력이 남아있으면 리액션 하고싶다.
+        {
+            state = State.React;
+            anim.SetTrigger("React");
         }
     }
 }

@@ -37,15 +37,32 @@ public class PlayerFire : MonoBehaviour
             RaycastHit hitInfo;
             if (Physics.Raycast(ray, out hitInfo, float.MaxValue, layer))
             {
+                bool isEnemy = false;
+                // 3. 시선이 닿은 곳에 총알자국공장에서 총알자국을 만들어서 배치하고싶다.
+                BImpactName biName = BImpactName.Floor;
+                // 만약 hitinfo의 물체의 레이어가 적이라면
+                if (hitInfo.transform.gameObject.layer == LayerMask.NameToLayer("Enemy"))
+                {
+                    biName = BImpactName.Enemy;
+                    isEnemy = true;
+                }
                 // 바라본곳에 뭔가 있다.
                 GameObject bulletImpact = Instantiate(bImpactFactorys[(int)BImpactName.Floor]);
                 bulletImpact.transform.position = hitInfo.point;
                 //방향을 회전하고 싶다. (튀는 방향:forward을 부딪힌 면의 Normal 방향으로
                 bulletImpact.transform.forward = hitInfo.normal;
+
+                // 만약 총에 맞는것이 적이라면
+                if (isEnemy)
+                {
+                    // 적에게 너 총에 맞았어! 라고 알려주고싶다.
+                    Enemy2 enemy = hitInfo.transform.gameObject.GetComponent<Enemy2>();
+                    enemy.DamageProcess(); 
+                }
             }
             else
             {
-                // 허공
+                //허공
             }
 
         }  //그곳에 총알자국공장에서 총알자국을 만들어서 배치하고 싶다.
