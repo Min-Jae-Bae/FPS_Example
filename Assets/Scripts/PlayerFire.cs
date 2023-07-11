@@ -2,12 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 //사용자가 마우스 왼쪽 버튼을 누르면
 // 총알공장에서 총알을 만들고
 // 그 총알을 배치하고 싶다.
+// 태어날 때 수류탄UI공장에서 수류탄UI를 만들어서 던지면 화면에 배치하고 쿨타임이 돌게하고싶다.
+//쿨타임이 1일 때 수류탄을 던질 수 있다. 던지면 쿨타임이 0이되게 하고싶다.
 public class PlayerFire : MonoBehaviour
 {
+    public GameObject grenadeUIFactory;
+    public ScrollRect scrollRectSkill;
     enum BImpactName
     {
         Floor,
@@ -17,6 +22,14 @@ public class PlayerFire : MonoBehaviour
     public Transform firePosition;
 
     public GameObject[] bImpactFactorys;
+    SkillItem item;
+    void Awake()
+    {
+        GameObject ui = Instantiate(grenadeUIFactory);
+        //캐싱
+        item = ui.GetComponent<SkillItem>();
+        ui.transform.parent = scrollRectSkill.content;
+    }
 
     private void Update()
     {
@@ -57,7 +70,7 @@ public class PlayerFire : MonoBehaviour
                 {
                     // 적에게 너 총에 맞았어! 라고 알려주고싶다.
                     Enemy2 enemy = hitInfo.transform.gameObject.GetComponent<Enemy2>();
-                    enemy.DamageProcess(); 
+                    enemy.DamageProcess();
                 }
             }
             else
@@ -72,9 +85,10 @@ public class PlayerFire : MonoBehaviour
 
     private void UpdateGrenade()
     {
-        //만약 사용자가 G키를 누르면 폭탄을 던지고싶다.
-        if (Input.GetKeyDown(KeyCode.G))
+        //만약 스킬을 사용할 수 있다면 그리고사용자가 G키를 누르면 폭탄을 던지고싶다.
+        if (Input.GetKeyDown(KeyCode.G) && item.CanDoIt())
         {
+            item.DoIt();
             //총알공장에서 총알을 만들고
             GameObject granade = Instantiate(granadeFactory);
             //그 총알을 총구위치에 배치하고싶다.
