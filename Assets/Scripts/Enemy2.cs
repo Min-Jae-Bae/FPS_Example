@@ -6,8 +6,19 @@ using UnityEngine.AI;
 
 // 상태머신으로 제어하고싶다.
 // agent를 이용해서 이동하고 싶다.
+// 나를 생성한 spawnManager 기억하고, 내가 죽을때 개한테 알려주고싶다.
 public class Enemy2 : MonoBehaviour
 {
+    SpawnManager mySpawnManager;
+    public void Init(SpawnManager spawnMgr)
+    {
+        mySpawnManager = spawnMgr;
+    }
+    void OnDestroy()
+    {
+        mySpawnManager.ImDie(this);
+    }
+ 
     EnemyHP enemyHP;
     public Animator anim;
     public enum State
@@ -141,12 +152,16 @@ public class Enemy2 : MonoBehaviour
     }
     #endregion
 
+    // 데미지를 입으면 데미지 UI를 내 위치 위쪽으로 1M 위에 배치하고싶다.
+    public GameObject dammageUIFactory;
     internal void DamageProcess(int damage = 1)
     {
         if (state == State.Die) return;
         //적 체력을 1감소하고싶다.
         enemyHP.HP -= damage;
         agent.isStopped = true;
+        GameObject ui = Instantiate(dammageUIFactory);
+        ui.transform.position = transform.position + Vector3.up * 1.2f;
         //만약 적 체력이 0이하라면
         if (enemyHP.HP <= 0)
         {
