@@ -1,5 +1,4 @@
-﻿using PatrolNChase;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,11 +7,7 @@ using UnityEngine.AI;
 // 상태머신으로 제어하고싶다.
 // agent를 이용해서 이동하고 싶다.
 // 나를 생성한 spawnManager 기억하고, 내가 죽을때 개한테 알려주고싶다.
-// 태어날 때 순찰 상태로 하고싶다.
-// 순찰할 때 플레이어가 근처에 오면
-// 플레이어를 추적하고싶다.
-// 추적중에 플레이어가 너무 멀어지면 다시 순찰 상태로 전이하고 싶다.
-public class Enemy2 : MonoBehaviour
+public class Enemy3 : MonoBehaviour
 {
     SpawnManager mySpawnManager;
     public void Init(SpawnManager spawnMgr)
@@ -23,24 +18,23 @@ public class Enemy2 : MonoBehaviour
     {
         mySpawnManager.ImDie(gameObject);
     }
-
+ 
     EnemyHP enemyHP;
     public Animator anim;
     public enum State
     {
         Idle,
-        Chase, // 추적
+        Move,
         Attack,
         React, //데미지
-        Die, //죽음
-        Patrol
+        Die //죽음
     }
     public State state;
 
     NavMeshAgent agent;
     public GameObject target;
     public float attackRange = 3;
-    public int targetIndex;
+
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -53,37 +47,19 @@ public class Enemy2 : MonoBehaviour
         // state를 기준으로 분기러치 해보세요
         switch (state)
         {
-            case State.Idle: UpdateIdle(); break;
-            case State.Chase: UpdateChase(); break;
-            case State.Attack: UpdateAttack(); break;
-            case State.Patrol: UpdatePatrol(); break;
+            case State.Idle:
+                UpdateIdle();
+                break;
+            case State.Move:
+                UpdateMove();
+                break;
+            case State.Attack:
+                UpdateAttack();
+                break;
+            default:
+                break;
         }
     }
-
-    private void UpdatePatrol()
-    {
-        //길정보를 알고싶다.
-        Vector3 pos = PathManager.instance.points[targetIndex].position;
-        //내가 길의 어떤 위치로 갈것인지 알고싶다.
-        agent.SetDestination(pos);
-        //0.1m까지 근접했다면 도착한 것으로 하고싶다.
-        float dist = Vector3.Distance(transform.position, pos);
-        //도착했다면 targetIndex를 1 증가 시키고 싶다.
-        if (dist < 1f)
-        {
-            targetIndex = (targetIndex + 1) % PathManager.instance.points.Length;
-        }
-
-        //만약 플레이어가 내 인식거리안에 들어있다면
-        float dist2 = Vector3.Distance(transform.position, target.transform.position);
-        if (dist2 < attackDistance)
-        {
-            //추적상태로 전이하고싶다.
-            state = State.Chase;
-        }
-    }
-
-    float attackDistance = 5;
 
     private void UpdateAttack()
     {
@@ -91,7 +67,7 @@ public class Enemy2 : MonoBehaviour
         transform.LookAt(target.transform);
     }
 
-    private void UpdateChase()
+    private void UpdateMove()
     {
         agent.destination = target.transform.position;
         //목적지와 나의 거리를 재고싶다.
@@ -104,14 +80,7 @@ public class Enemy2 : MonoBehaviour
             anim.SetTrigger("Attack");
             agent.isStopped = true;
         }
-        else if(distance > farDistance)
-        {
-            //만약 추격중에 플레이어와의 거리가 포기거리 보다 크다면
-            state = State.Patrol;
-            // 순찰 상태로 전이하고싶다.
-        }
     }
-    public float farDistance = 10;
 
     private void UpdateIdle()
     {
@@ -120,8 +89,7 @@ public class Enemy2 : MonoBehaviour
         //만약 목적지를 찾았다면 target != null
         if (target != null)
         {
-            // 순찰상태로 전이하고싶다.
-            state = State.Patrol;
+            state = State.Move;
             anim.SetTrigger("Move");
             agent.isStopped = false;
 
@@ -137,7 +105,7 @@ public class Enemy2 : MonoBehaviour
         float distance = Vector3.Distance(transform.position, target.transform.position);
         if (distance > attackRange)
         {
-            state = State.Chase;
+            state = State.Move;
             anim.SetTrigger("Move");
             agent.isStopped = false;
         }
@@ -165,7 +133,7 @@ public class Enemy2 : MonoBehaviour
         float distance = Vector3.Distance(transform.position, target.transform.position);
         if (distance > attackRange)
         {
-            state = State.Chase;
+            state = State.Move;
             anim.SetTrigger("Move");
             agent.isStopped = false;
         }
@@ -179,14 +147,13 @@ public class Enemy2 : MonoBehaviour
     public void OnReact_Finished()
     {
         //리액션이 끝났으니 Move상태로 전이하고 싶다.
-        state = State.Chase;
+        state = State.Move;
         anim.SetTrigger("Move");
     }
     #endregion
 
     // 데미지를 입으면 데미지 UI를 내 위치 위쪽으로 1M 위에 배치하고싶다.
     public GameObject dammageUIFactory;
-
     internal void DamageProcess(int damage = 1)
     {
         if (state == State.Die) return;
