@@ -534,6 +534,7 @@ MonoBehaviour:
   state: 0
   target: {fileID: 0}
   attackRange: 3
+  targetIndex: 0
   dammageUIFactory: {fileID: 2284128524432152460, guid: d83d0af4f807f514da8a4cef458b3ce2, type: 3}
 --- !u!114 &5952404796581313102
 MonoBehaviour:

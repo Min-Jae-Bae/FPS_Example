@@ -38,7 +38,7 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
-    internal void ImDie(Enemy2 enemy2)
+    internal void ImDie(GameObject enemy2)
     {
         makeCount--;
     }
