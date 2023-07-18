@@ -1,23 +1,64 @@
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// »ç¿ëÀÚÀÇ ÀÔ·Â¿¡ µû¶ó X¿Í YÃàÀÇ È¸ÀüÀ» ÇÏ°í½Í´Ù.
+// ì‚¬ìš©ìì˜ ì…ë ¥ì— ë”°ë¼ Xì™€ Yì¶•ì˜ íšŒì „ì„ í•˜ê³ ì‹¶ë‹¤.
 public class CameraRotate : MonoBehaviour
 {
     float rx, ry;
     public float rotSpeed = 200;
+    public float targetFOV;
+    void Start()
+    {
+        targetFOV = Camera.main.fieldOfView;
+        gunTargetlocalPosition = zoomOutPosition.localPosition;
+
+    }
     private void Update()
     {
-        //1. »ç¿ëÀÚÀÇ ÀÔ·Â¿¡ µû¶ó
+        //1. ì‚¬ìš©ìì˜ ì…ë ¥ì— ë”°ë¼
         float mx = Input.GetAxis("Mouse X");
         float my = Input.GetAxis("Mouse Y");
-        //2. x¿Í yÃàÀÇ °ªÀ» ´©ÀûÇÏ°í.
+        //2. xì™€ yì¶•ì˜ ê°’ì„ ëˆ„ì í•˜ê³ .
         rx += my * rotSpeed * Time.deltaTime;
         ry += mx * rotSpeed * Time.deltaTime;
-        //3. rx¿¡ ´ëÇØ °¢µµ¸¦ Á¦ÇÑÇÏ°í ½Í´Ù.
+        //3. rxì— ëŒ€í•´ ê°ë„ë¥¼ ì œí•œí•˜ê³  ì‹¶ë‹¤.
         rx = Mathf.Clamp(rx, -75, 75);
-        //4. ±× ´©Àû°ªÀ¸·Î È¸ÀüÀ» ÇÏ°í ½Í´Ù.
+        //4. ê·¸ ëˆ„ì ê°’ìœ¼ë¡œ íšŒì „ì„ í•˜ê³  ì‹¶ë‹¤.
         transform.eulerAngles = new Vector3(-rx, ry, 0);
+
+        UpdateZoom();
+    }
+
+    public float zoomInFOV = 15;
+    public float zoomOutFOV = 60;
+    // targetFOVì˜ ëª©ì ì§€ ë³€ìˆ˜ë¥¼ ë§Œë“¤ê³  ì¹´ë©”ë¼ì˜ targetFOVê°€ ìˆ˜ë ´í•˜ê³ ì‹¶ë‹¤.
+    // zoomì— ë”°ë¼ ì´ì˜ ìœ„ì¹˜ë¥¼ ë³€ê²½í•˜ê³ ì‹¶ë‹¤.
+    public Transform zoomInPosition;
+    public Transform zoomOutPosition;
+    public Transform gun;
+    Vector3 gunTargetlocalPosition;
+    public float zoomSpeed = 20;
+
+    private void UpdateZoom()
+    {
+        // ë§ˆìš°ìŠ¤ ì˜¤ë¥¸ìª½ ë²„íŠ¼ì„ ëˆ„ë¥´ë©´ Zoom In
+        if (Input.GetButtonDown("Fire2"))
+        {
+            targetFOV = zoomInFOV;
+            gunTargetlocalPosition = zoomInPosition.localPosition;
+            zoomSpeed = 20;
+        }
+        // ë§ˆìš°ìŠ¤ ì˜¤ë¥¸ìª½ ë²„íŠ¼ì„ ë–¼ë©´ Zooom Out
+        else if (Input.GetButtonUp("Fire2"))
+        {
+            targetFOV = zoomOutFOV;
+            gunTargetlocalPosition = zoomOutPosition.localPosition;
+            zoomSpeed = 5;
+        }
+
+        Camera.main.fieldOfView = Mathf.Lerp(Camera.main.fieldOfView, targetFOV, Time.deltaTime * zoomSpeed);
+        gun.localPosition = Vector3.Lerp(gun.localPosition, gunTargetlocalPosition, Time.deltaTime * zoomSpeed);
     }
 }
