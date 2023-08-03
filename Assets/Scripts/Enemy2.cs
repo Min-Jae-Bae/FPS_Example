@@ -14,14 +14,30 @@ using UnityEngine.AI;
 // 추적중에 플레이어가 너무 멀어지면 다시 순찰 상태로 전이하고 싶다.
 public class Enemy2 : MonoBehaviour
 {
-    SpawnManager mySpawnManager;
-    public void Init(SpawnManager spawnMgr)
+    public Action<GameObject> onDestoryed;
+
+    public void Init(Action<GameObject> callback)
     {
-        mySpawnManager = spawnMgr;
+        agent = GetComponent<NavMeshAgent>();
+        anim = GetComponentInChildren<Animator>();
+        enemyHP = GetComponent<EnemyHP>();
+
+        onDestoryed = callback;
+
+
+        // 초기화 ㅈ처리
+        // 체력, 현재상태, targetIndex, agent 위치를 초기화해야함
+        enemyHP.HP = enemyHP.maxHP;
+        state = State.Idle;
+        targetIndex = 0;
     }
-    void OnDestroy()
+    void DestroyMySelf()
     {
-        mySpawnManager.ImDie(gameObject);
+        if (onDestoryed != null)
+        {
+            onDestoryed(gameObject); 
+        }
+        gameObject.SetActive(false);
     }
 
     EnemyHP enemyHP;
@@ -41,12 +57,11 @@ public class Enemy2 : MonoBehaviour
     public GameObject target;
     public float attackRange = 3;
     public int targetIndex;
-    private void Start()
-    {
-        agent = GetComponent<NavMeshAgent>();
-        anim = GetComponentInChildren<Animator>();
-        enemyHP = GetComponent<EnemyHP>();
-    }
+ 
+    // 델리게이트 : 변수인데 함수를 담는 변수
+    // 람다식
+    // 무명함수
+ 
 
     private void Update()
     {
@@ -200,7 +215,7 @@ public class Enemy2 : MonoBehaviour
         {
             state = State.Die;
             // 파괴하고싶다.
-            Destroy(gameObject, 5);
+            Invoke("DestroyMySelf", 5);
             anim.SetTrigger("Die");
 
         }
@@ -210,4 +225,5 @@ public class Enemy2 : MonoBehaviour
             anim.SetTrigger("React");
         }
     }
+
 }

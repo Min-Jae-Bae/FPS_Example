@@ -22,17 +22,22 @@ public class SpawnManager : MonoBehaviour
             //적공장을 생성한다.
             if (makeCount < maxMakeCount)
             {
-                GameObject enemy = Instantiate(enemyFactory);
+                GameObject enemy = ObjectPool.instance.GetDeactiveObject();
                 // 나는 내가 죽었어
-                enemy.GetComponent<Enemy2>().Init(this);
-                makeCount++;
-                // 스폰목록중에 랜덤한 위치에 배치하고싶다.
-                int randomIndex = Random.Range(0, spawnList.Length);
-                enemy.transform.position = spawnList[randomIndex].position;
-                // 생성후에 생성시간을 랜덤으로 정하고 싶다.
+                if (enemy != null)
+                {
+                    makeCount++;
+                    // 스폰목록중에 랜덤한 위치에 배치하고싶다.
+                    int randomIndex = Random.Range(0, spawnList.Length);
+                    enemy.transform.position = spawnList[randomIndex].position;
+
+                    // 생성후에 생성시간을 랜덤으로 정하고 싶다.
+                    enemy.GetComponent<Enemy2>().Init(ImDie);
+
+                }
                 yield return new WaitForSeconds(makeTime);
                 //랜덤 시간
-                makeTime = Random.Range(1f, 2f); 
+                makeTime = Random.Range(1f, 2f);
             }
             yield return 0;
         }

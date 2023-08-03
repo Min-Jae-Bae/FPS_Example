@@ -43,6 +43,7 @@ public class PlayerFire : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1"))
         {
+            CameraShake.instance.Play(cameraShakeTime, cameraShakeIntensity);
             //카메라의 위치에서 카메라의 앞방향으로 시선을 만들고
             Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
             int layer = (1 << LayerMask.NameToLayer("Enemy")) | (1 << LayerMask.NameToLayer("Floor"));
@@ -82,6 +83,8 @@ public class PlayerFire : MonoBehaviour
     }
 
     public GameObject granadeFactory;
+    private float cameraShakeTime = 0.2f;
+    private float cameraShakeIntensity = 2;
 
     private void UpdateGrenade()
     {
